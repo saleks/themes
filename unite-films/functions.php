@@ -1,5 +1,6 @@
 <?php
 
+// register post type film and taxonomy genre, country, year
 add_action( 'init', 'slx_reg_film_post_type' );
 function slx_reg_film_post_type() {
 	// register taxonomies genre
@@ -121,8 +122,9 @@ function slx_reg_film_post_type() {
 function slx_render_field_price( $post ) {
 	wp_nonce_field( 'slx_save_post_film', '_nonce_price_film' );
 	$meta_price = get_post_meta( $post->ID, 'slx_meta_price' );
+	$price = ! empty( $meta_price ) ? $meta_price[0] : '';
 
-	echo '<label><input type="text" name="slx_meta_price" id="slx_meta_price" ></label>';
+	echo '<label><input type="text" name="slx_meta_price" id="slx_meta_price" value="' . $price . '" ></label>';
 }
 
 function slx_meta_price() {
@@ -134,9 +136,10 @@ add_action( 'add_meta_boxes', 'slx_meta_price' );
 // add custom meta
 function slx_render_field_release( $post ) {
 	wp_nonce_field( 'slx_save_post_film', '_nonce_release_film' );
-	$meta_price = get_post_meta( $post->ID, 'slx_meta_release' );
+	$meta_release = get_post_meta( $post->ID, 'slx_meta_release' );
+	$release = !empty( $meta_release ) ? $meta_release[0] : '';
 
-	echo '<label><input type="text" name="slx_meta_release" id="slx_meta_release" ></label>';
+	echo '<label><input type="text" name="slx_meta_release" id="slx_meta_release" value="' . $release . '" ></label>';
 }
 
 function slx_meta_release() {
@@ -171,3 +174,41 @@ function slx_save_post_film( $post_id ) {
 }
 
 add_action( 'save_post_film', 'slx_save_post_film' );
+
+add_filter( 'the_content', 'slx_film_content' );
+function slx_film_content( $content ) {
+	global $post;
+
+	if ( is_singular( 'film' ) ) {
+		$meta_price = get_post_meta( $post->ID, 'slx_meta_price', true );
+		$meta_release = get_post_meta( $post->ID, 'slx_meta_release', true );
+
+		$country = '';
+		$tax_countrys = get_the_terms( $post->ID, 'country' );
+		if ( ! empty( $tax_countrys )  ) {
+			foreach ( $tax_countrys as $tax_country ) {
+				$country .= '<a href="' . get_term_link( (int) $tax_country->term_id, $tax_country->taxonomy ) . '">' . $tax_country->name . '</a> ';
+			}
+		}
+		$genre = '';
+		$tax_genres = get_the_terms( $post->ID, 'genre' );
+		if ( ! empty( $tax_genres ) ) {
+			foreach ( $tax_genres as $tax_genre ) {
+				$genre .= '<a href="' . get_term_link( (int) $tax_genre->term_id, $tax_genre->taxonomy ) . '">' . $tax_genre->name . '</a> ';
+			}
+		}
+
+		$meta_film = '
+		<ul class="list-unstyled">
+			<li><span class="glyphicon glyphicon-film"></span> Genre - ' . $genre . '</li>
+			<li><span class="glyphicon glyphicon-globe"></span> Coutry - ' . $country . '</li>
+			<li><span class="glyphicon glyphicon-usd"></span> Price - ' . $meta_price . '</li>
+			<li><span class="glyphicon glyphicon-calendar"></span> Data release - ' . $meta_release . '</li>
+		</ul>';
+	}
+	if ( ! empty( $meta_film ) ) {
+		return $content . $meta_film;
+	} else {
+		$content;
+	}
+}

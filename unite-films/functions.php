@@ -179,20 +179,22 @@ add_filter( 'the_content', 'slx_film_content' );
 function slx_film_content( $content ) {
 	global $post;
 
-	if ( is_singular( 'film' ) ) {
+	$post_type = get_post_type( $post->ID );
+
+	if ( 'film' == $post_type && ! is_single() ) {
 		$meta_price = get_post_meta( $post->ID, 'slx_meta_price', true );
 		$meta_release = get_post_meta( $post->ID, 'slx_meta_release', true );
 
 		$country = '';
 		$tax_countrys = get_the_terms( $post->ID, 'country' );
-		if ( ! empty( $tax_countrys )  ) {
+		if ( ! empty( $tax_countrys ) && is_array( $tax_countrys )  ) {
 			foreach ( $tax_countrys as $tax_country ) {
 				$country .= '<a href="' . get_term_link( (int) $tax_country->term_id, $tax_country->taxonomy ) . '">' . $tax_country->name . '</a> ';
 			}
 		}
 		$genre = '';
 		$tax_genres = get_the_terms( $post->ID, 'genre' );
-		if ( ! empty( $tax_genres ) ) {
+		if ( ! empty( $tax_genres ) && is_array( $tax_genres ) ) {
 			foreach ( $tax_genres as $tax_genre ) {
 				$genre .= '<a href="' . get_term_link( (int) $tax_genre->term_id, $tax_genre->taxonomy ) . '">' . $tax_genre->name . '</a> ';
 			}
@@ -209,6 +211,6 @@ function slx_film_content( $content ) {
 	if ( ! empty( $meta_film ) ) {
 		return $content . $meta_film;
 	} else {
-		$content;
+		return $content;
 	}
 }

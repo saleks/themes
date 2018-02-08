@@ -116,3 +116,58 @@ function slx_reg_film_post_type() {
 		'supports'           => array('title','editor','author','thumbnail','excerpt','comments'),
 	) );
 }
+
+// add custom meta price
+function slx_render_field_price( $post ) {
+	wp_nonce_field( 'slx_save_post_film', '_nonce_price_film' );
+	$meta_price = get_post_meta( $post->ID, 'slx_meta_price' );
+
+	echo '<label><input type="text" name="slx_meta_price" id="slx_meta_price" ></label>';
+}
+
+function slx_meta_price() {
+	add_meta_box( 'slx_meta_price', __( 'Please enter ticket price' ), 'slx_render_field_price', 'film', 'normal', 'high' );
+}
+
+add_action( 'add_meta_boxes', 'slx_meta_price' );
+
+// add custom meta
+function slx_render_field_release( $post ) {
+	wp_nonce_field( 'slx_save_post_film', '_nonce_release_film' );
+	$meta_price = get_post_meta( $post->ID, 'slx_meta_release' );
+
+	echo '<label><input type="text" name="slx_meta_release" id="slx_meta_release" ></label>';
+}
+
+function slx_meta_release() {
+	add_meta_box( 'slx_meta_release', __( 'Please enter date release' ), 'slx_render_field_release', 'film', 'normal', 'high' );
+}
+
+add_action( 'add_meta_boxes', 'slx_meta_release' );
+
+// save post film
+function slx_save_post_film( $post_id ) {
+
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return $post_id;
+	}
+
+	$nonce_price = ( ! empty( $_POST['_nonce_price_film'] ) ) ? $_POST['_nonce_price_film'] : 0;
+	$nonce_release = ( ! empty( $_POST['_nonce_release_film'] ) ) ? $_POST['_nonce_release_film'] : 0;
+
+	if ( ! wp_verify_nonce( $nonce_price, 'slx_save_post_film' ) && ! wp_verify_nonce( $nonce_release, 'slx_save_post_film' ) ) {
+		return $post_id;
+	}
+
+	if ( isset( $_POST['slx_meta_price'] ) && ! empty( $_POST['slx_meta_price'] ) ) {
+		$price = sanitize_text_field( $_POST['slx_meta_price'] );
+		update_post_meta( $post_id, 'slx_meta_price', $price );
+	}
+
+	if ( isset( $_POST['slx_meta_release'] ) && ! empty( $_POST['slx_meta_release'] ) ) {
+		$release = sanitize_text_field( $_POST['slx_meta_release'] );
+		update_post_meta( $post_id, 'slx_meta_release', $release );
+	}
+}
+
+add_action( 'save_post_film', 'slx_save_post_film' );

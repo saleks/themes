@@ -2,49 +2,6 @@
 /**
  * template for post type film
  */
-function slx_get_all_meta() {
-	global $post;
-
-	$meta_film = '';
-
-	if ( $post ) {
-		$meta_price = get_post_meta( $post->ID, 'slx_meta_price', true );
-		$meta_release = get_post_meta( $post->ID, 'slx_meta_release', true );
-
-		$country = '';
-		$tax_countrys = get_the_terms( $post->ID, 'country' );
-		if ( ! empty( $tax_countrys ) && is_array( $tax_countrys )  ) {
-			foreach ( $tax_countrys as $tax_country ) {
-				$country .= '<a href="' . get_term_link( (int) $tax_country->term_id, $tax_country->taxonomy ) . '">' . $tax_country->name . '</a> ';
-			}
-		}
-		$genre = '';
-		$tax_genres = get_the_terms( $post->ID, 'genre' );
-		if ( ! empty( $tax_genres ) && is_array( $tax_genres ) ) {
-			foreach ( $tax_genres as $tax_genre ) {
-				$genre .= '<a href="' . get_term_link( (int) $tax_genre->term_id, $tax_genre->taxonomy ) . '">' . $tax_genre->name . '</a> ';
-			}
-		}
-
-		$actor = '';
-		$tax_actors = get_the_terms( $post->ID, 'actor' );
-		if ( ! empty( $tax_actors ) && is_array( $tax_actors )  ) {
-			foreach ( $tax_actors as $tax_actor ) {
-				$actor .= '<a href="' . get_term_link( (int) $tax_actor->term_id, $tax_actor->taxonomy ) . '">' . $tax_actor->name . '</a> ';
-			}
-		}
-
-		$meta_film = '
-		<ul class="list-unstyled">
-			<li><span class="glyphicon glyphicon-film"></span> Genre - ' . $genre . '</li>
-			<li><span class="glyphicon glyphicon-globe"></span> Coutry - ' . $country . '</li>
-			<li><span class="glyphicon glyphicon-user"></span> Actors - ' . $actor . '</li>
-			<li><span class="glyphicon glyphicon-usd"></span> Price - ' . $meta_price . '</li>
-			<li><span class="glyphicon glyphicon-calendar"></span> Data release - ' . $meta_release . '</li>
-		</ul>';
-	}
-	return $meta_film;
-}
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
